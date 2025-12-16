@@ -27,12 +27,20 @@ public class Event {
     @ManyToMany(mappedBy = "registeredEvents")
     private List<User> participants = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+    private boolean archived = false;
+
     public Event() {}
 
-    public Event(String title, String description, LocalDate date) {
+    public Event(String title, String description, LocalDate date, Group group) {
         this.title = title;
         this.description = description;
         this.date = date;
+        this.group = group;
+        this.archived = false; // Default to active
     }
 
     public LocalDate getDate() {
@@ -70,6 +78,12 @@ public class Event {
     public List<User> getParticipants() {
         return participants;
     }
+
+    public Group getGroup() { return group; }
+    public void setGroup(Group group) { this.group = group; }
+
+    public boolean isArchived() { return archived; }
+    public void setArchived(boolean archived) { this.archived = archived; }
 
     public void setParticipants(List<User> participants) {
         this.participants = participants;

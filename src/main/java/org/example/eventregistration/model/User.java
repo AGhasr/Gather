@@ -28,6 +28,9 @@ public class User {
     @ManyToMany
     private List<Event> registeredEvents = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "members")
+    private List<Group> groups = new ArrayList<>();
+
     public User() {}
 
     public User(String username, String password, String role) {
@@ -63,6 +66,9 @@ public class User {
     public String getRole() {
         return role;
     }
+
+    public List<Group> getGroups() { return groups; }
+    public void setGroups(List<Group> groups) { this.groups = groups; }
 
     public void setRole(String role) {
         this.role = role;
