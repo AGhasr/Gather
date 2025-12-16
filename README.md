@@ -1,3 +1,8 @@
+### 🚧 Major Update In Progress: Gather V2
+I am currently refactoring this project into a **Social Group Planner** with real-time chat and expense splitting.
+
+👉 **[Click here to see the active development branch (v2-social-upgrade)](https://github.com/AGhasr/event-registration/tree/v2-social-upgrade)**
+
 # 🎉 Event Registration System
 
 A Spring Boot application for managing events with **both web (Thymeleaf)** and **REST API** access, now secured using **JWT authentication**.
