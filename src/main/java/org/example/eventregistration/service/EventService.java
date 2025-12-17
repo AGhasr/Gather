@@ -1,13 +1,16 @@
 package org.example.eventregistration.service;
 
 import org.example.eventregistration.model.Event;
+import org.example.eventregistration.model.Group;
 import org.example.eventregistration.model.User;
 import org.example.eventregistration.repository.EventRepository;
+import org.example.eventregistration.repository.GroupRepository;
 import org.example.eventregistration.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,10 +18,12 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final GroupRepository groupRepository;
 
-    public EventService(EventRepository eventRepository, UserRepository userRepository) {
+    public EventService(EventRepository eventRepository, UserRepository userRepository, GroupRepository groupRepository) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
     }
 
     public List<Event> getUpcomingEvents() {
@@ -67,6 +72,50 @@ public class EventService {
 
     public List<Event> getUserEvents(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
+        if (user.getRegisteredEvents() == null) {
+            return new ArrayList<>(); // Return empty list instead of null
+        }
         return user.getRegisteredEvents();
+    }
+
+    public List<Event> getActiveEventsForUser(String username) {
+        return eventRepository.findActiveEventsForUser(username);
+    }
+
+    public List<Event> getArchivedEventsForUser(String username) {
+        return eventRepository.findArchivedEventsForUser(username);
+    }
+
+    @Transactional
+    public void archiveEvent(Long eventId, String username) {
+        Event event = eventRepository.findById(eventId).orElseThrow();
+
+        // Security Check: Ensure the user trying to archive is the Admin of the group
+        if (!event.getGroup().getAdmin().getUsername().equals(username)) {
+            throw new IllegalStateException("Only the Group Admin can archive events.");
+        }
+
+        event.setArchived(true);
+        eventRepository.save(event);
+    }
+
+    @Transactional
+    public Event createEventWithGroup(Event event, Long groupId, String username) {
+        // Find the group
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Group ID"));
+
+        // Security Check: Is the creator actually a member of this group?
+        boolean isMember = group.getMembers().stream()
+                .anyMatch(member -> member.getUsername().equals(username));
+
+        if (!isMember) {
+            throw new IllegalStateException("You can only create events for groups you belong to.");
+        }
+
+        // Link them
+        event.setGroup(group);
+
+        return eventRepository.save(event);
     }
 }
