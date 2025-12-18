@@ -1,13 +1,16 @@
 package org.example.eventregistration.config;
 
 import org.example.eventregistration.model.Event;
+import org.example.eventregistration.model.Group;
 import org.example.eventregistration.model.User;
 import org.example.eventregistration.repository.EventRepository;
+import org.example.eventregistration.repository.GroupRepository;
 import org.example.eventregistration.repository.UserRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
 
 import java.time.LocalDate;
 
@@ -17,27 +20,37 @@ public class DataLoader {
     private final EventRepository repo;
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final GroupRepository groupRepo;
 
-    public DataLoader(EventRepository repo, UserRepository userRepo, PasswordEncoder passwordEncoder) {
+    public DataLoader(EventRepository repo, UserRepository userRepo, PasswordEncoder passwordEncoder, GroupRepository groupRepo) {
         this.repo = repo;
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.groupRepo = groupRepo;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void loadData() {
-        // Create admin if not exists
-        if (userRepo.findByUsername("admin").isEmpty()) {
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin"));
-            admin.setRole("ADMIN");
-            userRepo.save(admin);
-        }
+        // 1. Create Users
+        User admin = new User("admin", passwordEncoder.encode("admin"), "ADMIN");
+        User alice = new User("alice", passwordEncoder.encode("1234"), "USER");
+        User bob = new User("bob", passwordEncoder.encode("1234"), "USER");
 
-        // Fix: Use the correct constructor parameters (title, description, date)
-        repo.save(new Event("Spring Boot Workshop", "Learn Spring Boot in 1 day", LocalDate.now().plusDays(5)));
-        repo.save(new Event("Docker Basics", "Get started with containers", LocalDate.now().plusDays(10)));
-        System.out.println("Default admin and events created.");
+        userRepo.save(admin);
+        userRepo.save(alice);
+        userRepo.save(bob);
+
+        // 2. Create Groups
+        Group parisTrip = new Group("Paris 2025", admin);
+        parisTrip.getMembers().add(alice); // Alice is invited
+        // Bob is NOT invited
+
+        groupRepo.save(parisTrip);
+
+        // 3. Create Events linked to Group
+        repo.save(new Event("Eiffel Tower Visit", "Sightseeing", LocalDate.now().plusDays(5), parisTrip));
+        repo.save(new Event("Dinner at Le Petit", "Food", LocalDate.now().plusDays(5), parisTrip));
+
+        System.out.println("Data loaded. Admin/Alice are in Paris Group. Bob is not.");
     }
 }

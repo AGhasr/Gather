@@ -66,11 +66,18 @@
     <div class="row" th:if="${not #lists.isEmpty(events)}">
         <div class="col-md-6 col-lg-4 mb-4" th:each="event : ${events}">
             <div class="card event-card h-100 shadow-sm">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(45deg, #667eea, #764ba2);">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-star me-2"></i>
-                        <span th:text="${event.title}"></span>
-                    </h5>
+                <div class="card-header text-white" style="background: linear-gradient(45deg, #667eea, #764ba2);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-star me-2"></i>
+                            <span th:text="${event.title}"></span>
+                        </h5>
+
+                        <span class="badge bg-light text-primary rounded-pill">
+                            <i class="fas fa-users me-1"></i>
+                            <span th:text="${event.group.name}"></span>
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <p class="card-text text-muted mb-3" th:text="${event.description}"></p>
@@ -93,6 +100,8 @@
                                 </span>
                         </div>
 
+
+
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between">
                             <form th:action="@{'/registerEvent/' + ${event.id}}" method="post"
@@ -103,11 +112,25 @@
                                 </button>
                             </form>
 
+                            <a th:href="@{'/groups/' + ${event.group.id} + '/chat'}"
+                               class="btn btn-outline-success btn-sm me-1">
+                                <i class="fas fa-comments"></i>
+                            </a>
+
                             <form th:action="@{'/cancelRegistration/' + ${event.id}}" method="post"
                                   th:if="${#lists.contains(registeredEvents, event)}"
                                   sec:authorize="isAuthenticated()">
                                 <button type="submit" class="btn btn-outline-warning btn-sm">
                                     <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </form>
+
+                            <form th:action="@{'/event/' + ${event.id} + '/archive'}" method="post"
+                                  sec:authorize="hasRole('ADMIN')"
+                                  class="me-1"
+                                  onsubmit="return confirm('Move this event to history? Users can no longer register.')">
+                                <button type="submit" class="btn btn-warning btn-sm text-white">
+                                    <i class="fas fa-archive me-1"></i>Archive
                                 </button>
                             </form>
 

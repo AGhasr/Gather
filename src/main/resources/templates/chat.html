@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Group Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-container {
+            height: 400px;
+            overflow-y: scroll;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+        }
+        .message-mine {
+            background-color: #007bff;
+            color: white;
+            margin-left: auto; /* Push to right */
+        }
+        .message-other {
+            background-color: #e9ecef;
+            color: black;
+            margin-right: auto; /* Push to left */
+        }
+        .sender-name {
+            font-size: 0.75rem;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Live Chat
+                    </h5>
+                    <a href="/groups" class="btn btn-sm btn-outline-light">Back to Groups</a>
+                </div>
+
+                <div class="card-body">
+                    <input type="hidden" id="groupId" th:value="${groupId}">
+                    <input type="hidden" id="username" th:value="${#authentication.name}">
+
+                    <div id="chat-box" class="chat-container mb-3">
+
+                        <div th:each="msg : ${history}"
+                             class="message"
+                             th:classappend="${msg.sender == #authentication.name} ? 'message-mine' : 'message-other'">
+
+                            <div class="sender-name" th:text="${msg.sender}"></div>
+                            <div th:text="${msg.content}"></div>
+                            <small class="text-muted" style="font-size: 0.65rem;" th:text="${msg.formattedTime}"></small>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(history)}" id="empty-msg" class="text-center text-muted mt-5">
+                            <small>Join the conversation!</small>
+                        </div>
+
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="message-input" class="form-control" placeholder="Type a message...">
+                        <button class="btn btn-primary" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    var stompClient = null;
+    var groupId = document.getElementById('groupId').value;
+    var username = document.getElementById('username').value;
+
+    function connect() {
+        // 1. Connect to the endpoint we defined in WebSocketConfig
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        // 2. Do the connection
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // 3. Subscribe to the Topic specific to this group
+            // Any message sent to /topic/group/{id} will be received here
+            stompClient.subscribe('/topic/group/' + groupId, function (messageOutput) {
+                showMessage(JSON.parse(messageOutput.body));
+            });
+        });
+    }
+
+    function sendMessage() {
+        var messageInput = document.getElementById('message-input');
+        var messageContent = messageInput.value.trim();
+
+        if(messageContent && stompClient) {
+            var chatMessage = {
+                sender: username,
+                content: messageContent,
+                groupId: groupId,
+                type: 'CHAT'
+            };
+
+            // 4. Send the message to the Controller (@MessageMapping)
+            stompClient.send("/app/chat/" + groupId, {}, JSON.stringify(chatMessage));
+            messageInput.value = ''; // Clear input
+        }
+    }
+
+    function showMessage(message) {
+        var chatBox = document.getElementById('chat-box');
+
+        // Remove "Join conversation" text if it's the first message
+        if (chatBox.innerText.includes("Join the conversation!")) {
+            chatBox.innerHTML = "";
+        }
+
+        var messageElement = document.createElement('div');
+
+        // Check who sent it to style it (Left vs Right)
+        if (message.sender === username) {
+            messageElement.classList.add('message', 'message-mine');
+        } else {
+            messageElement.classList.add('message', 'message-other');
+        }
+
+        var content = `
+            <div class="sender-name">${message.sender}</div>
+            <div>${message.content}</div>
+        `;
+
+        messageElement.innerHTML = content;
+        chatBox.appendChild(messageElement);
+
+        // Auto-scroll to bottom
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Connect automatically when page loads
+    window.onload = connect;
+
+    // Send on Enter key
+    document.getElementById("message-input").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+</script>
+
+</body>
+</html>

@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form th:action="@{/admin/new}" method="post" th:object="${event}">
+                    <form th:action="@{/events/new}" method="post" th:object="${event}">
                         <div class="mb-4">
                             <label class="form-label fw-bold">
                                 <i class="fas fa-heading me-2 text-primary"></i>Event Title
@@ -46,9 +46,6 @@
                                    class="form-control form-control-lg"
                                    placeholder="Enter event title..."
                                    required>
-                            <small class="form-text text-muted">
-                                Make it catchy and descriptive
-                            </small>
                         </div>
 
                         <div class="mb-4">
@@ -60,9 +57,6 @@
                                       rows="4"
                                       placeholder="Describe your event..."
                                       required></textarea>
-                            <small class="form-text text-muted">
-                                Provide details to help people understand what to expect
-                            </small>
                         </div>
 
                         <div class="mb-4">
@@ -73,11 +67,23 @@
                                    class="form-control form-control-lg"
                                    th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                                    required>
-                            <small class="form-text text-muted">
-                                Choose a future date for your event
-                            </small>
                         </div>
 
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-users me-2 text-primary"></i>Assign to Group
+                            </label>
+                            <select name="groupId" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>Select a Group...</option>
+                                <option th:each="group : ${groups}"
+                                        th:value="${group.id}"
+                                        th:text="${group.name}">
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Don't see your group? <a href="/groups">Create one here</a>.
+                            </small>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-custom btn-lg py-3">
                                 <i class="fas fa-rocket me-2"></i>
