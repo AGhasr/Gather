@@ -48,9 +48,15 @@
 
                             <div class="d-grid gap-2 mb-3">
                                 <a th:href="@{'/groups/' + ${group.id} + '/chat'}" class="btn btn-outline-success btn-sm">
-                                    <i class="fas fa-comments me-2"></i>Open Group Chat
+                                    <i class="fas fa-comments me-2"></i>Chat
+                                </a>
+
+                                <a th:href="@{'/groups/' + ${group.id} + '/expenses'}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-wallet me-2"></i>Wallet
                                 </a>
                             </div>
+
+
 
                             <hr>
 
