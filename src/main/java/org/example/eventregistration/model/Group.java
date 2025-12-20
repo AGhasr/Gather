@@ -31,6 +31,12 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Event> events = new ArrayList<>();
 
+    // ... existing fields ...
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    private List<Expense> expenses = new ArrayList<>();
+
+
     // Constructors, Getters, Setters
     public Group() {}
 
@@ -49,4 +55,7 @@ public class Group {
     public void setMembers(List<User> members) { this.members = members; }
     public List<Event> getEvents() { return events; }
     public void setEvents(List<Event> events) { this.events = events; }
+
+    public List<Expense> getExpenses() { return expenses; }
+    public void setExpenses(List<Expense> expenses) { this.expenses = expenses; }
 }
