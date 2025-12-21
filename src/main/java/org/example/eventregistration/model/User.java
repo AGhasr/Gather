@@ -25,6 +25,9 @@ public class User {
     private String password;
     private String role;
 
+    @Column(unique = true) // Ensure emails are unique
+    private String email;
+
     @ManyToMany
     private List<Event> registeredEvents = new ArrayList<>();
 
@@ -33,10 +36,19 @@ public class User {
 
     public User() {}
 
-    public User(String username, String password, String role) {
+    public User(String username, String password, String role, String email) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.email = email;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Long getId() {

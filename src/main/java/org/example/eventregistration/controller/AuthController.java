@@ -2,9 +2,7 @@ package org.example.eventregistration.controller;
 
 import jakarta.validation.Valid;
 import org.example.eventregistration.model.User;
-import org.example.eventregistration.repository.UserRepository;
 import org.example.eventregistration.service.UserService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,34 +19,35 @@ public class AuthController {
         this.userService = userService;
     }
 
-    /**
-     * Shows the user registration form.
-     * Accessible to anonymous users.
-     */
     @GetMapping("/register")
     public String registerForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
 
-    /**
-     * Handles registration form submission.
-     * Validates user input and saves new user with encoded password.
-     * Redirects to login on success.
-     */
     @PostMapping("/register")
     public String register(@Valid @ModelAttribute User user, BindingResult result) {
+        // 1. Standard Validation (Empty fields, etc.)
         if (result.hasErrors()) {
             return "register";
         }
 
-        // Check for duplicate username
+        // 2. Custom Validation: Check if Username exists
         if (userService.findByUsername(user.getUsername()).isPresent()) {
             result.rejectValue("username", "error.user", "Username already exists");
             return "register";
         }
 
-        userService.registerUser(user.getUsername(), user.getPassword(), "USER");
+        // 3. Custom Validation: Check if Email exists (NEW)
+        if (userService.emailExists(user.getEmail())) {
+            result.rejectValue("email", "error.user", "Email is already registered");
+            return "register";
+        }
+
+        // 4. Save with Email
+        // Note: passing "USER" as default role
+        userService.registerUser(user.getUsername(), user.getPassword(), user.getEmail(), "USER");
+
         return "redirect:/login";
     }
 

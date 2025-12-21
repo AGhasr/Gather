@@ -40,17 +40,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String username = jwtService.extractUsername(token);
+        // This usually extracts the username, but could theoretically be email
+        String usernameOrEmail = jwtService.extractUsername(token);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<User> userOpt = userRepo.findByUsername(username);
+        if (usernameOrEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            // UPDATED: Use the flexible finder method
+            Optional<User> userOpt = userRepo.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
 
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
 
+                // Validate token against the specific User object found
                 if (jwtService.isTokenValid(token, user.getUsername())) {
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            user.getUsername(),
+                            user.getUsername(), // Always set the Principal to the Username for consistency
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
                     );

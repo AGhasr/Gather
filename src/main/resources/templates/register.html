@@ -55,6 +55,19 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-envelope me-2"></i>Email Address
+                        </label>
+                        <input type="email" th:field="*{email}"
+                               class="form-control form-control-lg"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                               placeholder="name@example.com" required>
+                        <div th:if="${#fields.hasErrors('email')}"
+                             class="invalid-feedback" th:errors="*{email}">
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label class="form-label">
                             <i class="fas fa-lock me-2"></i>Password
