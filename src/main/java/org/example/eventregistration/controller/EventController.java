@@ -13,6 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -146,6 +149,41 @@ public class EventController {
         }
 
         return "redirect:/";
+    }
+
+    // ... inside EventController class ...
+
+    @GetMapping("/events/{id}/export")
+    public ResponseEntity<String> exportToCalendar(@PathVariable Long id) {
+        Event event = eventService.getEventById(id); // You might need to add this getter to Service if missing, or use Repository directly
+
+        // 1. Build the iCalendar (ICS) content manually
+        StringBuilder ics = new StringBuilder();
+        ics.append("BEGIN:VCALENDAR\n");
+        ics.append("VERSION:2.0\n");
+        ics.append("PRODID:-//Gather//SocialTravelPlanner//EN\n");
+
+        ics.append("BEGIN:VEVENT\n");
+        ics.append("UID:").append(event.getId()).append("@gather.app\n");
+        ics.append("DTSTAMP:").append(java.time.format.DateTimeFormatter.BASIC_ISO_DATE.format(java.time.LocalDate.now())).append("T000000Z\n");
+
+        // Handle Date: Since we only have LocalDate, we treat it as an All-Day Event
+        // Format: YYYYMMDD (e.g., 20251225)
+        String cleanDate = java.time.format.DateTimeFormatter.BASIC_ISO_DATE.format(event.getDate());
+        ics.append("DTSTART;VALUE=DATE:").append(cleanDate).append("\n");
+
+        // Summary (Title) & Description
+        ics.append("SUMMARY:").append(event.getTitle()).append("\n");
+        ics.append("DESCRIPTION:").append(event.getDescription()).append(" (Group: ").append(event.getGroup().getName()).append(")\n");
+
+        ics.append("END:VEVENT\n");
+        ics.append("END:VCALENDAR");
+
+        // 2. Return as a downloadable file
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"event-" + id + ".ics\"")
+                .contentType(MediaType.parseMediaType("text/calendar"))
+                .body(ics.toString());
     }
 
 }
