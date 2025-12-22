@@ -22,12 +22,12 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public User registerUser(String username, String password, String role) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        User user = new User(username, passwordEncoder.encode(password), role);
+    public void registerUser(String username, String password, String email, String role) {
+        User user = new User(username, passwordEncoder.encode(password), role, email);
         userRepository.save(user);
-        return user;
+    }
+
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 }

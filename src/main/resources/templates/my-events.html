@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Events - EventHub</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/styles.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     .event-card {
@@ -32,14 +33,12 @@
 
 
 <div class="container mt-5">
-  <!-- Success Message -->
   <div th:if="${param.message}" class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="fas fa-check-circle me-2"></i>
     <span th:text="${param.message}"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
 
-  <!-- Page Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="mb-1">
@@ -54,7 +53,6 @@
     </div>
   </div>
 
-  <!-- Events List -->
   <div class="row" th:if="${not #lists.isEmpty(myEvents)}">
     <div class="col-md-6 col-lg-4 mb-4" th:each="event : ${myEvents}">
       <div class="card event-card h-100 shadow-sm upcoming-event">
@@ -89,7 +87,6 @@
     </div>
   </div>
 
-  <!-- No Events Message -->
   <div th:if="${#lists.isEmpty(myEvents)}" class="text-center py-5">
     <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
     <h3 class="text-muted">No Events Registered</h3>

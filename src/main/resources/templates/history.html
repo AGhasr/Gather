@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memories - EventHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); /* Different color for history */
+            color: white;
+            padding: 3rem 0;
+        }
+        .event-card {
+            border: none;
+            border-radius: 15px;
+            opacity: 0.9;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-history me-3"></i>
+            Event Memories
+        </h1>
+        <p class="lead">Look back at the great times we've had.</p>
+    </div>
+</div>
+
+<div class="container mt-5">
+
+    <div class="row" th:if="${not #lists.isEmpty(archivedEvents)}">
+        <div class="col-md-6 col-lg-4 mb-4" th:each="event : ${archivedEvents}">
+            <div class="card event-card h-100 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">
+                        <span th:text="${event.title}"></span>
+                    </h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text text-muted mb-3" th:text="${event.description}"></p>
+
+                    <div class="mt-auto">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-calendar-check text-secondary me-2"></i>
+                            <span class="text-muted" th:text="${#temporals.format(event.date, 'dd MMM yyyy')}"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-archive me-1"></i>Archived
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(archivedEvents)}" class="text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+        <h3 class="text-muted">No History Yet</h3>
+        <p class="text-muted">Once events are done, archive them to see them here.</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
