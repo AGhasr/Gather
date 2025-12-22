@@ -46,7 +46,6 @@ public class ExpenseService {
         expenseRepository.save(expense);
     }
 
-    // Calculate Total Spent by the whole group
     public BigDecimal calculateGroupTotal(Long groupId) {
         return expenseRepository.findByGroupIdOrderByDateDesc(groupId).stream()
                 .map(Expense::getAmount)

@@ -12,19 +12,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Enable a simple memory-based message broker to send messages back to the client
-        // Prefixes for messages destined for the client (browser)
+        // Set up the memory-based message broker for outbound communication
         config.enableSimpleBroker("/topic");
 
-        // Prefixes for messages bound for methods annotated with @MessageMapping
+        // Define the prefix for inbound messages routed to @MessageMapping controllers
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // This is the "URL" the JavaScript will connect to
+        // Register the STOMP endpoint and enable SockJS fallback for compatibility
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // Allow connections from any domain (for dev)
-                .withSockJS(); // Enable SockJS fallback options
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 }

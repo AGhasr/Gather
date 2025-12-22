@@ -22,23 +22,24 @@ public class ChatController {
         this.chatRepo = chatRepo;
     }
 
-    // 1. LOAD HISTORY
+    /**
+     * Renders the chat view and loads the message history for a specific group.
+     */
     @GetMapping("/groups/{groupId}/chat")
     public String chatPage(@PathVariable Long groupId, Model model) {
         model.addAttribute("groupId", groupId);
-        // Load previous messages from DB
         model.addAttribute("history", chatRepo.findByGroupIdOrderByTimestampAsc(groupId));
         return "chat";
     }
 
-    // 2. SAVE & BROADCAST
+    /**
+     * Intercepts messages sent via WebSocket, persists them to the database,
+     * and broadcasts the payload to all subscribers of the specific group topic.
+     */
     @MessageMapping("/chat/{groupId}")
     @SendTo("/topic/group/{groupId}")
     public ChatMessage sendMessage(@DestinationVariable Long groupId, @Payload ChatMessage message) {
-        // Set server-side time to ensure accuracy
         message.setTimestamp(LocalDateTime.now());
-
-        // SAVE to Database
         return chatRepo.save(message);
     }
 }

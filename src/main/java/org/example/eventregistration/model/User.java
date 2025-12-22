@@ -25,7 +25,7 @@ public class User {
     private String password;
     private String role;
 
-    @Column(unique = true) // Ensure emails are unique
+    @Column(unique = true)
     private String email;
 
     @ManyToMany
@@ -86,9 +86,7 @@ public class User {
         this.role = role;
     }
 
-    /**
-     * Returns the list of events this user is registered for.
-     */
+
     public List<Event> getRegisteredEvents() {
         return registeredEvents;
     }

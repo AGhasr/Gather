@@ -9,11 +9,9 @@ import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    // Fetch ACTIVE events for a specific user (via their groups)
     @Query("SELECT e FROM Event e JOIN e.group g JOIN g.members m WHERE m.username = :username AND e.archived = false")
     List<Event> findActiveEventsForUser(@Param("username") String username);
 
-    // Fetch ARCHIVED events (History) for a specific user
     @Query("SELECT e FROM Event e JOIN e.group g JOIN g.members m WHERE m.username = :username AND e.archived = true")
     List<Event> findArchivedEventsForUser(@Param("username") String username);
 }

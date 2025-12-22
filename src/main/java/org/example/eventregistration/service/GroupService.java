@@ -28,41 +28,39 @@ public class GroupService {
 
     @Transactional
     public void createGroup(String groupName, String username) {
-        User user = userRepository.findByUsername(username).orElseThrow();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
-        // Create group and set the creator as Admin
         Group group = new Group(groupName, user);
-
-        // The constructor we wrote earlier adds the admin to members automatically,
-        // but let's be safe and ensure the relationship is saved.
         groupRepository.save(group);
     }
+
+    /**
+     * Adds a new member to an existing group.
+     * Restricted to the Group Administrator.
+     * Triggers an email notification upon success.
+     */
     @Transactional
     public void addMember(Long groupId, String newMemberUsername, String adminUsername) {
-        // 1. Find the group
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
 
-        // 2. Security: Only the Admin can add people
         if (!group.getAdmin().getUsername().equals(adminUsername)) {
             throw new IllegalStateException("Only the admin can add members.");
         }
 
-        // 3. Find the user to add
         User newMember = userRepository.findByUsername(newMemberUsername)
                 .orElseThrow(() -> new IllegalArgumentException("User '" + newMemberUsername + "' not found"));
 
-        // 4. Add them ONLY if not already there
-        if (!group.getMembers().contains(newMember)) {
-            group.getMembers().add(newMember);
-            groupRepository.save(group);
-
-            // 5. Send Email ONLY if we actually added them
-            if (newMember.getEmail() != null && !newMember.getEmail().isEmpty()) {
-                emailService.sendGroupInvite(newMember.getEmail(), group.getName(), adminUsername);
-            }
-        } else {
+        if (group.getMembers().contains(newMember)) {
             throw new IllegalArgumentException("User is already in the group!");
+        }
+
+        group.getMembers().add(newMember);
+        groupRepository.save(group);
+
+        if (newMember.getEmail() != null && !newMember.getEmail().isEmpty()) {
+            emailService.sendGroupNotification(newMember.getEmail(), group.getName(), adminUsername);
         }
     }
 }

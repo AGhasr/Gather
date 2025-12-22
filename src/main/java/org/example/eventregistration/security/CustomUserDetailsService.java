@@ -17,17 +17,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
-        // "input" is whatever the user typed in the login box
-        // It could be "bob" OR "bob@example.com"
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userRepository.findByUsernameOrEmail(identifier, identifier)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
 
-        // We use the new repository method to check BOTH columns
-        User user = userRepository.findByUsernameOrEmail(input, input)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + input));
-
-        // Convert our Database User to a Spring Security User
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername()) // IMPORTANT: Use the real username (e.g. "bob") internally
+                .withUsername(user.getUsername())
                 .password(user.getPassword())
                 .roles(user.getRole())
                 .build();

@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
@@ -26,27 +27,29 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@Valid @ModelAttribute User user, BindingResult result) {
-        // 1. Standard Validation (Empty fields, etc.)
+    public String register(@Valid @ModelAttribute User user,
+                           BindingResult result,
+                           RedirectAttributes redirectAttributes) {
+
         if (result.hasErrors()) {
             return "register";
         }
 
-        // 2. Custom Validation: Check if Username exists
+        // Validate unique identity constraints
         if (userService.findByUsername(user.getUsername()).isPresent()) {
             result.rejectValue("username", "error.user", "Username already exists");
             return "register";
         }
 
-        // 3. Custom Validation: Check if Email exists (NEW)
         if (userService.emailExists(user.getEmail())) {
             result.rejectValue("email", "error.user", "Email is already registered");
             return "register";
         }
 
-        // 4. Save with Email
-        // Note: passing "USER" as default role
+        // Persist new user with default role
         userService.registerUser(user.getUsername(), user.getPassword(), user.getEmail(), "USER");
+
+        redirectAttributes.addFlashAttribute("message", "Account created successfully! Please log in.");
 
         return "redirect:/login";
     }

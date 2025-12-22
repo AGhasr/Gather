@@ -6,9 +6,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 
+/**
+ * Controller managing the shared ledger and expense tracking within a group.
+ */
 @Controller
 @RequestMapping("/groups/{groupId}/expenses")
 public class ExpenseController {
@@ -27,13 +31,16 @@ public class ExpenseController {
         return "expenses";
     }
 
+
     @PostMapping
     public String addExpense(@PathVariable Long groupId,
                              @RequestParam String description,
                              @RequestParam BigDecimal amount,
-                             @AuthenticationPrincipal UserDetails userDetails) {
+                             @AuthenticationPrincipal UserDetails userDetails,
+                             RedirectAttributes redirectAttributes) {
 
         expenseService.addExpense(groupId, userDetails.getUsername(), description, amount);
+        redirectAttributes.addFlashAttribute("message", "Expense added successfully!");
         return "redirect:/groups/" + groupId + "/expenses";
     }
 }

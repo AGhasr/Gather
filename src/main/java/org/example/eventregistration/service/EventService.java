@@ -36,9 +36,14 @@ public class EventService {
         return eventRepository.save(event);
     }
 
+    /**
+     * Deletes an event and ensures all user associations are removed first.
+     */
     @Transactional
     public void deleteEvent(Long eventId) {
-        Event deletedEvent = eventRepository.findById(eventId).orElseThrow();
+        Event deletedEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
+
         for (User user : deletedEvent.getParticipants()) {
             user.getRegisteredEvents().remove(deletedEvent);
             userRepository.save(user);
@@ -48,8 +53,10 @@ public class EventService {
 
     @Transactional
     public void registerUserForEvent(String username, Long eventId) {
-        User user = userRepository.findByUsername(username).orElseThrow();
-        Event event = eventRepository.findById(eventId).orElseThrow();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
 
         if (user.getRegisteredEvents().contains(event)) {
             throw new IllegalStateException("User already registered!");
@@ -60,8 +67,10 @@ public class EventService {
 
     @Transactional
     public void unregisterUserFromEvent(String username, Long eventId) {
-        User user = userRepository.findByUsername(username).orElseThrow();
-        Event event = eventRepository.findById(eventId).orElseThrow();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
         if (!user.getRegisteredEvents().contains(event)) {
             throw new IllegalStateException("User not registered for this event!");
@@ -73,7 +82,7 @@ public class EventService {
     public List<Event> getUserEvents(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
         if (user.getRegisteredEvents() == null) {
-            return new ArrayList<>(); // Return empty list instead of null
+            return new ArrayList<>();
         }
         return user.getRegisteredEvents();
     }
@@ -86,11 +95,14 @@ public class EventService {
         return eventRepository.findArchivedEventsForUser(username);
     }
 
+    /**
+     * Moves an event to the archive. Restricted to Group Admins.
+     */
     @Transactional
     public void archiveEvent(Long eventId, String username) {
-        Event event = eventRepository.findById(eventId).orElseThrow();
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
-        // Security Check: Ensure the user trying to archive is the Admin of the group
         if (!event.getGroup().getAdmin().getUsername().equals(username)) {
             throw new IllegalStateException("Only the Group Admin can archive events.");
         }
@@ -99,13 +111,15 @@ public class EventService {
         eventRepository.save(event);
     }
 
+    /**
+     * Creates an event linked to a specific group.
+     * Validates that the creator is a member of the group.
+     */
     @Transactional
     public Event createEventWithGroup(Event event, Long groupId, String username) {
-        // Find the group
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Group ID"));
 
-        // Security Check: Is the creator actually a member of this group?
         boolean isMember = group.getMembers().stream()
                 .anyMatch(member -> member.getUsername().equals(username));
 
@@ -113,9 +127,12 @@ public class EventService {
             throw new IllegalStateException("You can only create events for groups you belong to.");
         }
 
-        // Link them
         event.setGroup(group);
-
         return eventRepository.save(event);
+    }
+
+    public Event getEventById(Long id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + id));
     }
 }

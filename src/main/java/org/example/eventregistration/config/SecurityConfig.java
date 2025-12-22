@@ -16,7 +16,6 @@ import org.example.eventregistration.security.JwtAuthFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Inject the filter
     private final JwtAuthFilter jwtFilter;
 
     public SecurityConfig(JwtAuthFilter jwtFilter) {
@@ -46,7 +45,8 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
                 );
 
         return http.build();

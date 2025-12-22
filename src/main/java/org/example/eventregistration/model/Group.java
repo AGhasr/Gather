@@ -5,20 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "user_groups") // "groups" is a reserved SQL keyword in some DBs
+@Table(name = "user_groups")
 public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; // e.g., "Paris Trip 2024" or "Weekend BBQ"
+    private String name;
 
-    // The Creator/Admin of the group
     @ManyToOne
     private User admin;
 
-    // The Members of the group
     @ManyToMany
     @JoinTable(
             name = "group_members",
@@ -27,23 +25,19 @@ public class Group {
     )
     private List<User> members = new ArrayList<>();
 
-    // The Events that belong to this group
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Event> events = new ArrayList<>();
-
-    // ... existing fields ...
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Expense> expenses = new ArrayList<>();
 
 
-    // Constructors, Getters, Setters
     public Group() {}
 
     public Group(String name, User admin) {
         this.name = name;
         this.admin = admin;
-        this.members.add(admin); // Admin is automatically a member
+        this.members.add(admin);
     }
 
     public Long getId() { return id; }

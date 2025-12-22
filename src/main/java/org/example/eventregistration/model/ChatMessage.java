@@ -16,7 +16,6 @@ public class ChatMessage {
     private String sender;
     private Long groupId;
 
-    // We store the raw time for sorting, but we can format it for display
     private LocalDateTime timestamp;
 
     public ChatMessage() {}
@@ -28,7 +27,6 @@ public class ChatMessage {
         this.timestamp = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

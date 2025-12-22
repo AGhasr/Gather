@@ -40,7 +40,7 @@ public class Event {
         this.description = description;
         this.date = date;
         this.group = group;
-        this.archived = false; // Default to active
+        this.archived = false;
     }
 
     public LocalDate getDate() {
