@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    aws:
+      parameterstore:
+        enabled: true
+        default-context: /event-registration
+        profile-separator: _
+
+  datasource:
+    url: jdbc:postgresql://eventdb-postgres.cbuaew6gium8.eu-north-1.rds.amazonaws.com:5432/eventdb
+    username: ${DB_USERNAME:eventapp}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: ${JWT_SECRET}

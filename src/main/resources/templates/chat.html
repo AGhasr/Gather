@@ -3,6 +3,7 @@
 <head>
     <title>Group Chat</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .chat-container {
@@ -22,12 +23,12 @@
         .message-mine {
             background-color: #007bff;
             color: white;
-            margin-left: auto; /* Push to right */
+            margin-left: auto;
         }
         .message-other {
             background-color: #e9ecef;
             color: black;
-            margin-right: auto; /* Push to left */
+            margin-right: auto;
         }
         .sender-name {
             font-size: 0.75rem;
@@ -93,16 +94,12 @@
     var username = document.getElementById('username').value;
 
     function connect() {
-        // 1. Connect to the endpoint we defined in WebSocketConfig
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
-        // 2. Do the connection
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
 
-            // 3. Subscribe to the Topic specific to this group
-            // Any message sent to /topic/group/{id} will be received here
             stompClient.subscribe('/topic/group/' + groupId, function (messageOutput) {
                 showMessage(JSON.parse(messageOutput.body));
             });
@@ -121,23 +118,20 @@
                 type: 'CHAT'
             };
 
-            // 4. Send the message to the Controller (@MessageMapping)
             stompClient.send("/app/chat/" + groupId, {}, JSON.stringify(chatMessage));
-            messageInput.value = ''; // Clear input
+            messageInput.value = '';
         }
     }
 
     function showMessage(message) {
         var chatBox = document.getElementById('chat-box');
 
-        // Remove "Join conversation" text if it's the first message
         if (chatBox.innerText.includes("Join the conversation!")) {
             chatBox.innerHTML = "";
         }
 
         var messageElement = document.createElement('div');
 
-        // Check who sent it to style it (Left vs Right)
         if (message.sender === username) {
             messageElement.classList.add('message', 'message-mine');
         } else {
@@ -152,14 +146,11 @@
         messageElement.innerHTML = content;
         chatBox.appendChild(messageElement);
 
-        // Auto-scroll to bottom
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Connect automatically when page loads
     window.onload = connect;
 
-    // Send on Enter key
     document.getElementById("message-input").addEventListener("keypress", function(event) {
         if (event.key === "Enter") {
             sendMessage();
