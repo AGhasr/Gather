@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: event-registration
+    name: gather
 
   datasource:
     url: jdbc:h2:mem:testdb
