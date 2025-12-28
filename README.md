@@ -1,151 +1,97 @@
-###  Update In Progress: Gather V2
-I am currently refactoring this project into a **Social Group Planner** with real-time chat and expense splitting.
+# Gather - Social Group Planner
 
+Gather is a Spring Boot application designed to help friends organize trips and events together. Originally built as a simple event registration system, it has been refactored into a social planning platform with real-time communication and shared expense tracking.
 
-# 🎉 Event Registration System
+The application functions via a **server-side rendered Thymeleaf UI** and is containerized for production.
 
-A Spring Boot application for managing events with **both web (Thymeleaf)** and **REST API** access, now secured using **JWT authentication**.
+## 🔗 Live Demo
+**Access the app here:** [https://gather-xrz0.onrender.com](https://gather-xrz0.onrender.com)
+> *Note: Hosted on Render's free tier. The server may take 60 seconds to "wake up" if it has been inactive.*
 
-## 🌟 **[Live Demo](https://event-registration-app-orzo.onrender.com)**
+## 🚀 Key Features (v2)
 
-**Default login credentials:**
-- Username: `admin`
-- Password: `admin`
+* **Group Management:** Create squads (groups) and invite friends via username.
+* **Event Scheduling:** Create events specific to a group, track attendance, and archive past events.
+* **Real-Time Chat:** WebSocket-based group chat with persistent history.
+* **Shared Wallet:** Log shared expenses within a group and track total spending.
+* **Role-Based Access:** Admins manage event deletions; Users manage registrations and expenses.
+* **Notifications:** Email alerts when users are added to groups.
 
----
+## ⚠️ Project Status: Refactoring
 
-## 📌 Features
+This project is currently migrating from **v1 (Event Registration)** to **v2 (Gather)**.
+* ✅ **Web UI (Thymeleaf):** Fully updated with Groups, Chat, and Expenses.
+* 🚧 **REST API:** Currently reflects v1 logic. Endpoints for Groups, Chat, and Expenses are **pending implementation**.
 
-- Public list of upcoming events
-- User registration with encrypted passwords
-- **JWT-based authentication** for REST API access
-- **REST API endpoints** for authentication, event registration, and listing events
-- User login with role-based access (User/Admin)
-- Admin can create and delete events
-- Users can register or cancel event participation
-- Prevents duplicate registrations
-- Thymeleaf templates for the web interface (role-based UI rendering)
-- H2 in-memory database for quick setup
+## 🛠️ Tech Stack
 
----
+* **Core:** Java 17, Spring Boot 3
+* **Data:** Spring Data JPA, PostgreSQL (Production), H2 (Local Dev)
+* **Security:** Spring Security, BCrypt, JWT
+* **Real-time:** Spring WebSockets (STOMP), SockJS
+* **Frontend:** Thymeleaf, Bootstrap 5
+* **DevOps:** Docker, Render
 
-## 🚀 Technologies Used
+## 📦 Getting Started
 
-- Java 17
-- Spring Boot 3
-- Spring Security (JWT authentication & role-based access control)
-- Spring Data JPA (H2 database)
-- Thymeleaf (template engine)
-- Bootstrap 5 (basic responsive design)
-- Maven
-- Docker
+### Prerequisites
+* Java 17+
+* Maven
+* Docker (Optional, for containerized run)
 
----
+### Run Locally (Simple)
 
-## 🎯 How to Run the Application
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/AGhasr/gather.git](https://github.com/AGhasr/gather.git)
+    cd gather
+    ```
 
-### 🐳 Quick Start with Docker (Recommended)
+2.  **Build and Run**
+    The app uses H2 by default for local development, so no database setup is required.
+    ```bash
+    mvn spring-boot:run
+    ```
 
-You can run the application immediately with Docker without cloning or building anything:
+3.  **Access the App**
+    * Web UI: `http://localhost:8080`
+    * H2 Console: `http://localhost:8080/h2-console`
 
-#### 1. Generate a secure JWT secret:
+### 🔑 Environment Variables
+To run the app in production (or via Docker) with full functionality, set these variables.
 
-**Linux/macOS:**
-```bash
-openssl rand -base64 64
-```
+| Variable | Description | Default (if unset) |
+| :--- | :--- | :--- |
+| `JWT_SECRET` | Secret key for generating tokens | *(Hardcoded dev key)* |
+| `SPRING_DATASOURCE_URL` | Database connection URL | `jdbc:h2:mem:testdb` |
+| `SPRING_DATASOURCE_USERNAME` | Database User | `sa` |
+| `SPRING_DATASOURCE_PASSWORD` | Database Password | `password` |
+| `MAIL_USERNAME` | SMTP Username (e.g., Mailtrap) | `null` |
+| `MAIL_PASSWORD` | SMTP Password | `null` |
 
-**Or using Node.js:**
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-```
+## 🔐 Default Credentials
 
-#### 2. Run with Docker (replace `YOUR_GENERATED_SECRET` with the secret from step 1):
+The application seeds default data on startup (see `DataLoader.java`).
 
-```bash
-docker run -e JWT_SECRET="YOUR_GENERATED_SECRET" -p 8080:8080 aghasr/event-registration-app:latest
-```
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin` | `admin` |
+| **User** | `alice` | `1234` |
+| **User** | `bob` | `1234` |
 
-⚠️ **Do not use short strings like `1234`. JWT requires at least a 256-bit key for HS256 signing.**
+## 📡 API Reference (Legacy v1)
 
----
+> **Note:** The REST API supports the legacy Event Registration flow. It does not yet support Groups or Chat.
 
-### 🔧 Local Development (Optional)
+**Base URL:** `/api`
 
-If you want to modify the code:
+* `POST /auth/login` - Returns JWT Token
+* `GET /events` - List public events
+* `POST /events/register/{id}` - Register for an event
 
-#### 1. Clone the repository
-```bash
-git clone https://github.com/AGhasr/event-registration.git
-cd event-registration-app
-```
+## 🔮 Roadmap
 
-#### 2. Create a `.env` file with your JWT secret
-```bash
-echo "JWT_SECRET=$(openssl rand -base64 64)" > .env
-```
-
-#### 3. Build and run
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-### 3. Access the application
-
-```
-http://localhost:8080
-```
-
-### 4. Test the REST API (JWT required)
-
-#### Register:
-```http
-POST http://localhost:8080/api/auth/register
-Content-Type: application/json
-
-{
-  "username": "ali",
-  "password": "1234"
-}
-```
-
-#### Login (get JWT token):
-```http
-POST http://localhost:8080/api/auth/login
-Content-Type: application/json
-
-{
-  "username": "ali",
-  "password": "1234"
-}
-```
-
-Response will contain the token — use it in the Authorization header for API requests:
-```
-Authorization: Bearer <token>
-```
-
-## 👥 Default Web Users
-
-| Username | Password | Role  |
-|----------|----------|-------|
-| admin    | admin    | ADMIN |
-
-## 🗂 Project Structure
-
-```
-src/main/java/org/example/eventregistration
-├── config       # Security config, JWT filter, data loader
-├── controller   # Web controllers & REST API controllers
-├── dto          # Data Transfer Objects (EventDTO, Auth DTOs)
-├── model        # Entity classes (User, Event)
-├── repository   # Spring Data JPA repositories
-├── security     # JWT-related classes (JwtService, JwtAuthFilter)
-└── service      # Business logic (CustomUserDetailsService)
-```
-
-Templates for the web UI are in:
-```
-src/main/resources/templates
-```
+* [ ] Update REST API to support Group and Expense endpoints.
+* [ ] "Who owes who" algorithm for expense settlement.
+* [ ] Cloudinary/S3 integration for profile pictures.
+* [ ] Typing indicators for group chat.
