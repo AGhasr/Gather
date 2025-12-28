@@ -25,15 +25,15 @@ public class AuthRestController {
         this.authService = authService;
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
-//        try {
-//            authService.register(request);
-//            return ResponseEntity.ok("User registered");
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+        try {
+            authService.register(request);
+            return ResponseEntity.ok("User registered");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {

@@ -22,9 +22,19 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public void registerUser(String username, String password, String email, String role) {
-        User user = new User(username, passwordEncoder.encode(password), role, email);
-        userRepository.save(user);
+    public User registerUser(String username, String password, String email, String role) {
+
+        if (userRepository.findByUsernameOrEmail(username, email).isPresent()) {
+            throw new IllegalArgumentException("Username or Email already taken!");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(role);
+
+        return userRepository.save(user);
     }
 
     public boolean emailExists(String email) {
