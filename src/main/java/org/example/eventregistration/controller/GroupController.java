@@ -1,5 +1,6 @@
 package org.example.eventregistration.controller;
 
+import org.example.eventregistration.model.Group;
 import org.example.eventregistration.service.GroupService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -55,6 +56,33 @@ public class GroupController {
             redirectAttributes.addFlashAttribute("message", username + " has been added to the group.");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", "Could not add user: " + e.getMessage());
+        }
+        return "redirect:/groups";
+    }
+
+    @GetMapping("/groups/join/{code}")
+    public String joinGroup(@PathVariable String code,
+                            @AuthenticationPrincipal UserDetails userDetails,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            Group group = groupService.joinByInviteCode(code, userDetails.getUsername());
+            redirectAttributes.addFlashAttribute("message", "You joined " + group.getName() + "!");
+            return "redirect:/groups"; // or redirect to specific group page
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "Invalid invite link.");
+            return "redirect:/groups";
+        }
+    }
+
+    @PostMapping("/groups/{id}/refresh-code")
+    public String refreshCode(@PathVariable Long id,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            groupService.regenerateInviteCode(id, userDetails.getUsername());
+            redirectAttributes.addFlashAttribute("message", "Invite link updated.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/groups";
     }

@@ -3,6 +3,7 @@ package org.example.eventregistration.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_groups")
@@ -31,6 +32,9 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<Expense> expenses = new ArrayList<>();
 
+    @Column(unique = true)
+    private String inviteCode;
+
 
     public Group() {}
 
@@ -38,6 +42,7 @@ public class Group {
         this.name = name;
         this.admin = admin;
         this.members.add(admin);
+        this.inviteCode = UUID.randomUUID().toString();
     }
 
     public Long getId() {
@@ -86,5 +91,13 @@ public class Group {
 
     public void setExpenses(List<Expense> expenses) {
         this.expenses = expenses;
+    }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
     }
 }
