@@ -2,6 +2,7 @@ package org.example.eventregistration.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,7 +26,10 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Username is required")
     private String username;
-    @Size(min = 4, message = "Password must be at least 4 characters")
+    @Pattern(
+            regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$",
+            message = "Password must be at least 8 characters long and contain at least one digit, one uppercase letter, and one lowercase letter."
+    )
     private String password;
     private String role;
 

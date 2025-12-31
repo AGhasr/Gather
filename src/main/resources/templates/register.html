@@ -80,10 +80,7 @@
                         <div th:if="${#fields.hasErrors('password')}"
                              class="invalid-feedback" th:errors="*{password}">
                         </div>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Password should be at least 4 characters long
-                        </small>
+
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">

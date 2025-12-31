@@ -82,4 +82,11 @@ public class AuthController {
             return "verify";
         }
     }
+
+    @PostMapping("/resend-code")
+    public String resendCode(@RequestParam String email, RedirectAttributes redirectAttributes) {
+        userService.resendVerificationCode(email);
+        redirectAttributes.addFlashAttribute("message", "New code sent! Check your inbox.");
+        return "redirect:/verify?email=" + email;
+    }
 }

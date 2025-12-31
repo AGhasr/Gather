@@ -45,9 +45,52 @@
 
     <div class="text-center mt-3">
         <small class="text-muted">Didn't receive the code?</small>
-        <a href="#" class="text-decoration-none ms-1">Resend</a>
+
+        <a href="#" id="resendLink"
+           class="text-decoration-none ms-1 disabled text-muted"
+           style="pointer-events: none;"
+           onclick="document.getElementById('resendForm').submit();">
+            Resend Code
+        </a>
+
+        <span id="timer" class="text-danger ms-1">(30s)</span>
     </div>
+
+    <form id="resendForm" th:action="@{/resend-code}" method="post" style="display: none;">
+        <input type="hidden" name="email" th:value="${email}">
+    </form>
 </div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if(this.id !== 'resendForm') {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
+        }
+    });
+
+    let timeLeft = 30;
+    const timerElem = document.getElementById('timer');
+    const resendLink = document.getElementById('resendLink');
+
+    if (timerElem && resendLink) {
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElem.textContent = `(${timeLeft}s)`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerElem.style.display = 'none';
+
+                resendLink.classList.remove('disabled', 'text-muted');
+                resendLink.classList.add('text-primary');
+                resendLink.style.pointerEvents = 'auto';
+                resendLink.textContent = "Resend Code Now";
+            }
+        }, 1000);
+    }
+</script>
 
 </body>
 </html>

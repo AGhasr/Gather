@@ -66,4 +66,20 @@ public class UserService {
         }
         return false;
     }
+
+    public void resendVerificationCode(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.isEnabled()) {
+            throw new RuntimeException("Account is already verified. Please login.");
+        }
+
+        String newCode = String.valueOf((int) (Math.random() * 900000) + 100000);
+
+        user.setVerificationCode(newCode);
+        userRepository.save(user);
+
+        emailService.sendVerificationEmail(user.getEmail(), newCode);
+    }
 }
