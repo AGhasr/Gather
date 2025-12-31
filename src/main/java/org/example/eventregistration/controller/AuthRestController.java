@@ -6,6 +6,8 @@ import org.example.eventregistration.model.User;
 import org.example.eventregistration.repository.UserRepository;
 import org.example.eventregistration.service.AuthService;
 import org.example.eventregistration.service.JwtService;
+import org.example.eventregistration.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,14 +17,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthRestController {
 
     private final AuthService authService;
+    private final UserService userService;
 
-    public AuthRestController(AuthService authService) {
+    public AuthRestController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @PostMapping("/register")
@@ -38,5 +44,19 @@ public class AuthRestController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyAccount(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+
+        boolean isVerified = userService.verifyUser(email, code);
+
+        if (isVerified) {
+            return ResponseEntity.ok("Account verified successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid code or email.");
+        }
     }
 }

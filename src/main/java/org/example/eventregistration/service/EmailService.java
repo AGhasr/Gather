@@ -45,4 +45,14 @@ public class EmailService {
             logger.error("Failed to send notification email to {}", toEmail, e);
         }
     }
+
+    @Async
+    public void sendVerificationEmail(String to, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Gather App - Verify your email");
+        message.setText("Welcome to Gather! \n\nYour verification code is: " + code);
+
+        emailSender.send(message);
+    }
 }

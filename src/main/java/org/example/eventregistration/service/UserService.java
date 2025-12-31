@@ -10,12 +10,14 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public Optional<User> findByUsername(String username) {
@@ -34,10 +36,34 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
 
-        return userRepository.save(user);
+        user.setEnabled(false);
+
+        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+        user.setVerificationCode(code);
+
+        User savedUser = userRepository.save(user);
+
+        emailService.sendVerificationEmail(email, code);
+
+        return savedUser;
     }
 
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
+    }
+
+    public boolean verifyUser(String email, String code) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (code.equals(user.getVerificationCode())) {
+                user.setEnabled(true);
+                user.setVerificationCode(null);
+                userRepository.save(user);
+                return true;
+            }
+        }
+        return false;
     }
 }
