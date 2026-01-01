@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
         <a class="navbar-brand" href="/">
             <i class="fas fa-calendar-alt me-2"></i>
@@ -73,16 +73,30 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('form').forEach(form => {
-                form.addEventListener('submit', function() {
+                // Pass 'event' into the function
+                form.addEventListener('submit', function(event) {
+
+                    // CRITICAL FIX:
+                    // If you clicked "Cancel" in the confirm dialog, event.defaultPrevented will be true.
+                    // We simply return and do nothing.
+                    if (event.defaultPrevented) return;
+
                     const btn = this.querySelector('button[type="submit"]');
-                    if (btn) {
-                        const originalText = btn.innerHTML;
+
+                    if (btn && !btn.disabled) {
+                        const originalWidth = btn.offsetWidth;
+                        const originalContent = btn.innerHTML;
+
                         btn.disabled = true;
-                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Working...';
+                        btn.style.width = originalWidth + 'px';
+
+                        // Show spinner
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
                         setTimeout(() => {
                             btn.disabled = false;
-                            btn.innerHTML = originalText;
+                            btn.innerHTML = originalContent;
+                            btn.style.width = '';
                         }, 5000);
                     }
                 });
