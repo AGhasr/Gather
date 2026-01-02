@@ -73,12 +73,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('form').forEach(form => {
-                // Pass 'event' into the function
                 form.addEventListener('submit', function(event) {
 
-                    // CRITICAL FIX:
-                    // If you clicked "Cancel" in the confirm dialog, event.defaultPrevented will be true.
-                    // We simply return and do nothing.
+
                     if (event.defaultPrevented) return;
 
                     const btn = this.querySelector('button[type="submit"]');
@@ -90,7 +87,6 @@
                         btn.disabled = true;
                         btn.style.width = originalWidth + 'px';
 
-                        // Show spinner
                         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
                         setTimeout(() => {

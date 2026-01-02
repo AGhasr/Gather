@@ -75,7 +75,6 @@
     var username = document.getElementById('username').value;
     var chatBox = document.getElementById('chat-box');
 
-    // Auto-scroll to bottom on load
     function scrollToBottom() {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -83,7 +82,6 @@
     function connect() {
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
-        // Disable debug logs for cleaner console
         stompClient.debug = null;
 
         stompClient.connect({}, function (frame) {
@@ -113,7 +111,6 @@
     }
 
     function showMessage(message) {
-        // Remove empty state if it exists
         var emptyMsg = document.getElementById('empty-msg');
         if (emptyMsg) emptyMsg.remove();
 
