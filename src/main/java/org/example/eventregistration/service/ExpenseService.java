@@ -51,4 +51,9 @@ public class ExpenseService {
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    public BigDecimal getTotalSpentByUser(String username) {
+        BigDecimal total = expenseRepository.sumTotalSpentByUser(username);
+        return total != null ? total : BigDecimal.ZERO;
+    }
 }

@@ -1,7 +1,9 @@
 package org.example.eventregistration.controller;
 
 import org.example.eventregistration.model.Event;
+import org.example.eventregistration.service.DebtService;
 import org.example.eventregistration.service.EventService;
+import org.example.eventregistration.service.ExpenseService;
 import org.example.eventregistration.service.GroupService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -21,10 +24,14 @@ public class EventController {
 
     private final EventService eventService;
     private final GroupService groupService;
+    private final DebtService debtService;
+    private final ExpenseService expenseService;
 
-    public EventController(EventService eventService, GroupService groupService) {
+    public EventController(EventService eventService, GroupService groupService, DebtService debtService, ExpenseService expenseService) {
         this.eventService = eventService;
         this.groupService = groupService;
+        this.debtService = debtService;
+        this.expenseService = expenseService;
     }
 
     /**
@@ -34,11 +41,33 @@ public class EventController {
     @GetMapping("/")
     public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
-            model.addAttribute("events", eventService.getActiveEventsForUser(userDetails.getUsername()));
-            model.addAttribute("registeredEvents", eventService.getUserEvents(userDetails.getUsername()));
+            String username = userDetails.getUsername();
+
+            List<Event> allEvents = eventService.getActiveEventsForUser(username);
+
+            long upcomingCount = allEvents.stream()
+                    .filter(e -> !e.getDate().isBefore(java.time.LocalDate.now()))
+                    .count();
+
+            int activeGroups = groupService.getMyGroups(username).size();
+
+            BigDecimal totalSpent = expenseService.getTotalSpentByUser(username);
+
+            model.addAttribute("events", allEvents);
+            model.addAttribute("registeredEvents", eventService.getUserEvents(username));
+            model.addAttribute("globalBalance", debtService.getUserGlobalBalance(username));
+
+            model.addAttribute("upcomingCount", upcomingCount);
+            model.addAttribute("activeGroups", activeGroups);
+            model.addAttribute("totalSpent", totalSpent);
+
         } else {
             model.addAttribute("events", List.of());
             model.addAttribute("registeredEvents", List.of());
+            model.addAttribute("globalBalance", java.math.BigDecimal.ZERO);
+            model.addAttribute("upcomingCount", 0);
+            model.addAttribute("activeGroups", 0);
+            model.addAttribute("totalSpent", java.math.BigDecimal.ZERO);
         }
         return "events";
     }
@@ -90,9 +119,16 @@ public class EventController {
         return "redirect:/";
     }
 
-    @PostMapping("/admin/delete/{eventId}")
-    public String deleteEvent(@PathVariable Long eventId) {
-        eventService.deleteEvent(eventId);
+    @PostMapping("/events/{id}/delete")
+    public String deleteEvent(@PathVariable Long id,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            eventService.deleteEvent(id, userDetails.getUsername());
+            redirectAttributes.addFlashAttribute("message", "Event deleted successfully.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", "Access Denied: " + e.getMessage());
+        }
         return "redirect:/";
     }
 

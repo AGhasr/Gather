@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gather - Settlements</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-5 mt-4">
+
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <h6 class="text-uppercase text-primary fw-bold letter-spacing-1 mb-1">
+                <a href="/" class="text-decoration-none text-primary"><i class="fas fa-arrow-left me-2"></i>Back to Dashboard</a>
+            </h6>
+            <h2 class="fw-bold text-dark mb-0">Settlements & Debts</h2>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success border-0 shadow-sm mb-4 d-flex align-items-center">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${message}">Success message</span>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom border-light p-4">
+                    <div class="d-flex align-items-center text-danger">
+                        <div class="bg-danger-subtle rounded-circle p-2 me-3" style="width: 40px; height: 40px; display:grid; place-items:center;">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">I Owe</h5>
+                            <small class="text-muted">People waiting for your payment</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(toPay)}" class="text-center py-5">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-check text-muted"></i>
+                        </div>
+                        <p class="text-muted fw-medium mb-0">You don't owe anyone.</p>
+                    </div>
+
+                    <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(toPay)}">
+                        <li class="list-group-item p-4 border-light" th:each="debt : ${toPay}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-initial rounded-circle bg-danger text-white fw-bold me-3"
+                                         style="width: 45px; height: 45px; display: grid; place-items: center;">
+                                        <span th:text="${#strings.substring(debt.toUser,0,1).toUpperCase()}">U</span>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0" th:text="${debt.toUser}">Username</h6>
+                                        <span class="badge bg-light text-secondary border mt-1">
+                                            <i class="fas fa-users me-1"></i> <span th:text="${debt.groupName}">Group</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="fw-bold text-danger mb-2">
+                                        €<span th:text="${debt.amount}">0.00</span>
+                                    </h5>
+
+                                    <form action="/debts/settle" method="post"
+                                          onsubmit="return confirm('Confirm that you have paid this amount physically? This will settle the debt in the app.');">
+                                        <input type="hidden" name="groupId" th:value="${debt.groupId}"/>
+                                        <input type="hidden" name="payee" th:value="${debt.toUser}"/>
+                                        <input type="hidden" name="amount" th:value="${debt.amount}"/>
+
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                            Mark Paid
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom border-light p-4">
+                    <div class="d-flex align-items-center text-success">
+                        <div class="bg-success-subtle rounded-circle p-2 me-3" style="width: 40px; height: 40px; display:grid; place-items:center;">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">Owed To Me</h5>
+                            <small class="text-muted">Money you should receive</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(owedToMe)}" class="text-center py-5">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-wallet text-muted"></i>
+                        </div>
+                        <p class="text-muted fw-medium mb-0">No one owes you money right now.</p>
+                    </div>
+
+                    <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(owedToMe)}">
+                        <li class="list-group-item p-4 border-light" th:each="debt : ${owedToMe}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-initial rounded-circle bg-success text-white fw-bold me-3"
+                                         style="width: 45px; height: 45px; display: grid; place-items: center;">
+                                        <span th:text="${#strings.substring(debt.fromUser,0,1).toUpperCase()}">U</span>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0" th:text="${debt.fromUser}">Username</h6>
+                                        <span class="badge bg-light text-secondary border mt-1">
+                                            <i class="fas fa-users me-1"></i> <span th:text="${debt.groupName}">Group</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="fw-bold text-success mb-0">
+                                        €<span th:text="${debt.amount}">0.00</span>
+                                    </h5>
+                                    <small class="text-muted" style="font-size: 0.75rem;">Waiting for payment</small>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
