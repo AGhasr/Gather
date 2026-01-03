@@ -1,6 +1,7 @@
 package org.example.eventregistration.service;
 
 import org.example.eventregistration.model.Event;
+import org.example.eventregistration.model.Group;
 import org.example.eventregistration.model.User;
 import org.example.eventregistration.repository.EventRepository;
 import org.example.eventregistration.repository.UserRepository;
@@ -67,21 +68,33 @@ class EventServiceTest {
     }
 
     @Test
-    void deleteEvent_shouldRemoveFromUsers() {
+    void deleteEvent_shouldRemoveFromUsers_WhenCalledByGroupAdmin() {
         Long eventId = 1L;
+        String adminUsername = "groupCreator";
+
+        User adminUser = new User();
+        adminUser.setUsername(adminUsername);
+
+        Group group = new Group();
+        group.setAdmin(adminUser);
+
         Event event = new Event();
         event.setId(eventId);
+        event.setGroup(group);
 
-        User user = new User();
-        user.getRegisteredEvents().add(event);
-        event.getParticipants().add(user);
+        User participant = new User();
+        participant.setUsername("regularUser");
+
+        participant.getRegisteredEvents().add(event);
+        event.getParticipants().add(participant);
 
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
-        eventService.deleteEvent(eventId);
+        eventService.deleteEvent(eventId, adminUsername);
 
-        verify(userRepository).save(user); // Should save user to update relationship
+        verify(userRepository).save(participant);
         verify(eventRepository).delete(event);
-        assertThat(user.getRegisteredEvents()).isEmpty();
+
+        assertThat(participant.getRegisteredEvents()).isEmpty();
     }
 }

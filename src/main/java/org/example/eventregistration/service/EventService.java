@@ -36,19 +36,22 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    /**
-     * Deletes an event and ensures all user associations are removed first.
-     */
+
     @Transactional
-    public void deleteEvent(Long eventId) {
-        Event deletedEvent = eventRepository.findById(eventId)
+    public void deleteEvent(Long eventId, String username) {
+        Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
 
-        for (User user : deletedEvent.getParticipants()) {
-            user.getRegisteredEvents().remove(deletedEvent);
+        if (!event.getGroup().getAdmin().getUsername().equals(username)) {
+            throw new IllegalStateException("Only the Group Creator can delete this event.");
+        }
+
+        for (User user : event.getParticipants()) {
+            user.getRegisteredEvents().remove(event);
             userRepository.save(user);
         }
-        eventRepository.delete(deletedEvent);
+
+        eventRepository.delete(event);
     }
 
     @Transactional
@@ -95,9 +98,6 @@ public class EventService {
         return eventRepository.findArchivedEventsForUser(username);
     }
 
-    /**
-     * Moves an event to the archive. Restricted to Group Admins.
-     */
     @Transactional
     public void archiveEvent(Long eventId, String username) {
         Event event = eventRepository.findById(eventId)
@@ -111,10 +111,6 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    /**
-     * Creates an event linked to a specific group.
-     * Validates that the creator is a member of the group.
-     */
     @Transactional
     public Event createEventWithGroup(Event event, Long groupId, String username) {
         Group group = groupRepository.findById(groupId)
