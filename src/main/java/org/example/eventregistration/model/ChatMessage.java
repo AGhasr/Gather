@@ -8,6 +8,12 @@ import java.time.format.DateTimeFormatter;
 @Table(name = "chat_messages")
 public class ChatMessage {
 
+    public enum MessageType {
+        CHAT,
+        POLL,
+        SYSTEM
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,6 +21,13 @@ public class ChatMessage {
     private String content;
     private String sender;
     private Long groupId;
+
+    @Enumerated(EnumType.STRING)
+    private MessageType type = MessageType.CHAT;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "poll_id")
+    private Poll poll;
 
     private LocalDateTime timestamp;
 
@@ -25,24 +38,25 @@ public class ChatMessage {
         this.sender = sender;
         this.groupId = groupId;
         this.timestamp = LocalDateTime.now();
+        this.type = MessageType.CHAT;
     }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
-
     public String getSender() { return sender; }
     public void setSender(String sender) { this.sender = sender; }
-
     public Long getGroupId() { return groupId; }
     public void setGroupId(Long groupId) { this.groupId = groupId; }
-
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public MessageType getType() { return type; }
+    public void setType(MessageType type) { this.type = type; }
+    public Poll getPoll() { return poll; }
+    public void setPoll(Poll poll) { this.poll = poll; }
 
     public String getFormattedTime() {
-        return timestamp.format(DateTimeFormatter.ofPattern("HH:mm"));
+        return timestamp != null ? timestamp.format(DateTimeFormatter.ofPattern("HH:mm")) : "";
     }
 }
