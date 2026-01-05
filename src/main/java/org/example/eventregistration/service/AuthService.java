@@ -32,8 +32,7 @@ public class AuthService {
         return userService.registerUser(
                 request.getUsername(),
                 request.getPassword(),
-                request.getEmail(),
-                "USER"
+                request.getEmail()
         );
     }
 }

@@ -43,7 +43,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // when
-        User result = userService.registerUser(username, rawPass, email, "USER");
+        User result = userService.registerUser(username, rawPass, email);
 
         // then
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -63,7 +63,7 @@ class UserServiceTest {
 
         // when + then
         assertThrows(IllegalArgumentException.class, () ->
-                userService.registerUser("ali", "pass", "ali@test.com", "USER")
+                userService.registerUser("ali", "pass", "ali@test.com")
         );
 
         verify(userRepository, never()).save(any());

@@ -24,7 +24,7 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public User registerUser(String username, String password, String email, String role) {
+    public User registerUser(String username, String password, String email) {
 
         if (userRepository.findByUsernameOrEmail(username, email).isPresent()) {
             throw new IllegalArgumentException("Username or Email already taken!");
@@ -34,7 +34,6 @@ public class UserService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
-        user.setRole(role);
 
         user.setEnabled(false);
 

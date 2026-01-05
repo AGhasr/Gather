@@ -31,7 +31,6 @@ public class User implements UserDetails {
             message = "Password must be at least 8 characters long and contain at least one digit, one uppercase letter, and one lowercase letter."
     )
     private String password;
-    private String role;
 
     @Column(unique = true)
     private String email;
@@ -47,10 +46,9 @@ public class User implements UserDetails {
 
     public User() {}
 
-    public User(String username, String password, String role, String email) {
+    public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
-        this.role = role;
         this.email = email;
     }
 
@@ -89,7 +87,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role));
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     public String getPassword() {
@@ -100,17 +98,8 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public String getRole() {
-        return role;
-    }
-
     public List<Group> getGroups() { return groups; }
     public void setGroups(List<Group> groups) { this.groups = groups; }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
 
     public List<Event> getRegisteredEvents() {
         return registeredEvents;

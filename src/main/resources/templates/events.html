@@ -81,7 +81,7 @@
                                     Net Balance
                                 </h6>
                                 <h2 class="fw-bold mb-0 text-dark">
-                                    <span th:text="${globalBalance >= 0 ? '+' : ''}"></span>€<span th:text="${totalBalance != null ? totalBalance : globalBalance}">0.00</span>
+                                    €<span th:text="${totalBalance != null ? totalBalance : globalBalance}">0.00</span>
                                 </h2>
                                 <small class="text-muted" th:if="${globalBalance > 0}">You are owed money overall.</small>
                                 <small class="text-muted" th:if="${globalBalance < 0}">You owe money overall.</small>
@@ -158,7 +158,7 @@
                 <h6 class="text-uppercase text-primary fw-bold letter-spacing-1 mb-1">Discover</h6>
             </div>
 
-            <h2 class="fw-bold text-dark mb-0">Upcoming Events</h2>
+            <h2 class="fw-bold text-dark mb-0">Upcoming Plans</h2>
         </div>
 
         <a href="/events/new" class="btn btn-primary shadow-sm" sec:authorize="isAuthenticated()">

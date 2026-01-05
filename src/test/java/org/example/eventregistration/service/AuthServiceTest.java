@@ -45,10 +45,8 @@ class AuthServiceTest {
         User expectedUser = new User();
         expectedUser.setUsername(username);
         expectedUser.setEmail(email);
-        expectedUser.setRole("USER");
 
-        // Mock the UserService call including the email parameter
-        when(userService.registerUser(username, password, email, "USER"))
+        when(userService.registerUser(username, password, email))
                 .thenReturn(expectedUser);
 
         // when
@@ -59,8 +57,7 @@ class AuthServiceTest {
         assertThat(result.getUsername()).isEqualTo(username);
         assertThat(result.getEmail()).isEqualTo(email);
 
-        // Verify the service was called with the email
-        verify(userService).registerUser(username, password, email, "USER");
+        verify(userService).registerUser(username, password, email);
     }
 
     @Test
