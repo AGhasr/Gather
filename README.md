@@ -1,97 +1,203 @@
-# Gather - Social Group Planner
+# Gather – Social Event & Trip Planner
 
-Gather is a Spring Boot application designed to help friends organize trips and events together. Originally built as a simple event registration system, it has been refactored into a social planning platform with real-time communication and shared expense tracking.
+🔗 **Live Demo**
+Access the app here: [https://gather-xrz0.onrender.com](https://gather-xrz0.onrender.com)
 
-The application functions via a **server-side rendered Thymeleaf UI** and is containerized for production.
+> **Note:** Hosted on Render's free tier. The server may take a few minutes to wake up if inactive.
 
-## 🔗 Live Demo
-**Access the app here:** [https://gather-xrz0.onrender.com](https://gather-xrz0.onrender.com)
-> *Note: Hosted on Render's free tier. The server may take 60 seconds to "wake up" if it has been inactive.*
+---
 
-## 🚀 Key Features (v2)
+Gather is a Spring Boot web application that helps groups plan trips and events together, with a strong focus on **shared expenses and debt splitting (Splitwise-like functionality)**.
 
-* **Group Management:** Create squads (groups) and invite friends via username.
-* **Event Scheduling:** Create events specific to a group, track attendance, and archive past events.
-* **Real-Time Chat:** WebSocket-based group chat with persistent history.
-* **Shared Wallet:** Log shared expenses within a group and track total spending.
-* **Role-Based Access:** Admins manage event deletions; Users manage registrations and expenses.
-* **Notifications:** Email alerts when users are added to groups.
+It allows friends or travel groups to not only organize events, but also **track who paid what, calculate balances automatically, and settle debts transparently**, all in one platform.
 
-## ⚠️ Project Status: Refactoring
+---
 
-This project is currently migrating from **v1 (Event Registration)** to **v2 (Gather)**.
-* ✅ **Web UI (Thymeleaf):** Fully updated with Groups, Chat, and Expenses.
-* 🚧 **REST API:** Currently reflects v1 logic. Endpoints for Groups, Chat, and Expenses are **pending implementation**.
+##  Key Features
 
-## 🛠️ Tech Stack
+### 👤 Authentication & Security
 
-* **Core:** Java 17, Spring Boot 3
-* **Data:** Spring Data JPA, PostgreSQL (Production), H2 (Local Dev)
-* **Security:** Spring Security, BCrypt, JWT
-* **Real-time:** Spring WebSockets (STOMP), SockJS
-* **Frontend:** Thymeleaf, Bootstrap 5
-* **DevOps:** Docker, Render
+* User registration with email verification
+* Login via form-based auth or REST API
+* JWT authentication for API access
+* Password hashing using BCrypt
+* Protected routes with Spring Security
 
-## 📦 Getting Started
+### 👥 Groups
+
+* Create and manage groups
+* Group admin role
+* Invite users via invite links (regeneratable codes)
+* Join groups using invite code
+* View all groups you belong to
+
+### 📅 Events
+
+* Create events within a group
+* Register / unregister for events
+* Archive past events (history)
+* Export events as `.ics` (iCalendar) files
+* Dashboard overview with:
+
+    * Upcoming events count
+    * Active groups
+    * Total spending
+    * Global balance
+
+### 💬 Real-Time Group Chat
+
+* Group-based chat using WebSockets (STOMP + SockJS)
+* Persistent chat history (stored in DB)
+* System and user messages
+
+### 📊 Polls & Voting (in Chat)
+
+* Create polls directly in group chat
+* Multiple options per poll
+* One vote per user
+* Live vote updates via WebSockets
+
+### 💸 Expenses & Shared Ledger
+
+* Add shared expenses per group
+* Automatic expense splitting
+* View total group spending
+* REST API support for expenses
+
+### ⚖️ Debt Calculation & Settlement
+
+* Automatic debt calculation per group
+* Global balance overview per user
+* View:
+
+    * Debts you need to pay
+    * Debts owed to you
+* Manual settlement tracking
+
+---
+
+##  Architecture Overview
+
+* **Backend**: Spring Boot (MVC + REST)
+* **Security**: Spring Security, JWT
+* **Persistence**: Spring Data JPA, Hibernate
+* **Database**: H2 (dev) / configurable for production
+* **Views**: Thymeleaf
+* **Real-time**: WebSockets (STOMP)
+* **Async Tasks**: Spring `@EnableAsync`
+
+---
+
+##  Main Modules
+
+* `auth` – registration, login, verification, JWT
+* `groups` – group lifecycle and membership
+* `events` – event management & calendar export
+* `chat` – real-time messaging and polls
+* `expenses` – shared costs and totals
+* `debts` – balance calculation and settlement
+
+Each module exposes:
+
+* MVC controllers (web UI)
+* REST controllers (API)
+* Service layer (business logic)
+* Repository layer (JPA)
+
+---
+
+##  REST API Overview (Examples)
+
+### Authentication
+
+* `POST /api/auth/register`
+* `POST /api/auth/login`
+* `POST /api/auth/verify`
+
+### Groups
+
+* `GET /api/groups`
+* `POST /api/groups`
+* `POST /api/groups/{groupId}/members`
+
+### Events
+
+* `GET /api/events`
+* `POST /api/events/new?groupId=1`
+* `POST /api/events/register/{eventId}`
+* `POST /api/events/unregister/{eventId}`
+
+### Expenses
+
+* `GET /api/groups/{groupId}/expenses`
+* `GET /api/groups/{groupId}/expenses/total`
+* `POST /api/groups/{groupId}/expenses`
+
+> All API endpoints (except auth) require a valid JWT token.
+
+---
+
+##  Demo Data
+
+By default, the application seeds demo data on startup:
+
+* Users: `ali / 1234`, `tom / 1234`
+* Example group and events
+
+You can disable seeding in production:
+
+```properties
+app.db.seed=false
+```
+
+---
+
+##  Running the Project Locally
 
 ### Prerequisites
+
 * Java 17+
 * Maven
-* Docker (Optional, for containerized run)
 
-### Run Locally (Simple)
+### Run
 
-1.  **Clone the repository**
-    ```bash
-    git clone [https://github.com/AGhasr/gather.git](https://github.com/AGhasr/gather.git)
-    cd gather
-    ```
+```bash
+mvn spring-boot:run
+```
 
-2.  **Build and Run**
-    The app uses H2 by default for local development, so no database setup is required.
-    ```bash
-    mvn spring-boot:run
-    ```
+App will be available at:
 
-3.  **Access the App**
-    * Web UI: `http://localhost:8080`
-    * H2 Console: `http://localhost:8080/h2-console`
+```
+http://localhost:8080
+```
 
-### 🔑 Environment Variables
-To run the app in production (or via Docker) with full functionality, set these variables.
+---
 
-| Variable | Description | Default (if unset) |
-| :--- | :--- | :--- |
-| `JWT_SECRET` | Secret key for generating tokens | *(Hardcoded dev key)* |
-| `SPRING_DATASOURCE_URL` | Database connection URL | `jdbc:h2:mem:testdb` |
-| `SPRING_DATASOURCE_USERNAME` | Database User | `sa` |
-| `SPRING_DATASOURCE_PASSWORD` | Database Password | `password` |
-| `MAIL_USERNAME` | SMTP Username (e.g., Mailtrap) | `null` |
-| `MAIL_PASSWORD` | SMTP Password | `null` |
 
-## 🔐 Default Credentials
 
-The application seeds default data on startup (see `DataLoader.java`).
+## 🛠️ Technologies Used
 
-| Role | Username | Password |
-| :--- | :--- | :--- |
-| **Admin** | `admin` | `admin` |
-| **User** | `alice` | `1234` |
-| **User** | `bob` | `1234` |
+* Java 17
+* Spring Boot
+* Spring Security
+* Spring Data JPA
+* Hibernate
+* WebSockets (STOMP, SockJS)
+* JWT
+* Thymeleaf
+* Maven
 
-## 📡 API Reference (Legacy v1)
+---
 
-> **Note:** The REST API supports the legacy Event Registration flow. It does not yet support Groups or Chat.
+##  Project Status
 
-**Base URL:** `/api`
+The project is actively evolving and designed to be extended with additional features and integrations.
 
-* `POST /auth/login` - Returns JWT Token
-* `GET /events` - List public events
-* `POST /events/register/{id}` - Register for an event
+###  Planned Features / Roadmap
 
-## 🔮 Roadmap
+* [ ] **Profile Pictures**: Allow users to upload and manage custom profile pictures.
+* [ ] **Location Sharing**: Ability to send map pins or current location in group chat.
+* [ ] **Push Notifications**: Web push notifications for new chat messages
+* [ ] **Recurring Events**: Support for weekly and monthly meetups
+* [ ] **Advanced Expense Splitting**: Split expenses by percentage or shares (currently even split)
 
-* [ ] Update REST API to support Group and Expense endpoints.
-* [ ] "Who owes who" algorithm for expense settlement.
-* [ ] Cloudinary/S3 integration for profile pictures.
-* [ ] Typing indicators for group chat.
