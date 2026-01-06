@@ -13,66 +13,55 @@ It allows friends or travel groups to not only organize events, but also **track
 
 ---
 
-##  Key Features
+## ✨ Key Features
 
-### 👤 Authentication & Security
+### 📅 Events & Planning
+Create and manage group events, registrations, and schedules with a central dashboard overview.
 
-* User registration with email verification
-* Login via form-based auth or REST API
-* JWT authentication for API access
-* Password hashing using BCrypt
-* Protected routes with Spring Security
+![Events Page](screenshots/events.png)
 
-### 👥 Groups
+---
 
-* Create and manage groups
-* Group admin role
-* Invite users via invite links (regeneratable codes)
-* Join groups using invite code
-* View all groups you belong to
+### 💸 Shared Expenses (Splitwise-like)
+Track shared expenses per group, automatically split costs, and maintain a transparent shared wallet.
 
-### 📅 Events
+- Automatic expense splitting
+- Group spending overview
+- Per-user balances
 
-* Create events within a group
-* Register / unregister for events
-* Archive past events (history)
-* Export events as `.ics` (iCalendar) files
-* Dashboard overview with:
+![Expenses Wallet](screenshots/expenses.png)
 
-    * Upcoming events count
-    * Active groups
-    * Total spending
-    * Global balance
-
-### 💬 Real-Time Group Chat
-
-* Group-based chat using WebSockets (STOMP + SockJS)
-* Persistent chat history (stored in DB)
-* System and user messages
-
-### 📊 Polls & Voting (in Chat)
-
-* Create polls directly in group chat
-* Multiple options per poll
-* One vote per user
-* Live vote updates via WebSockets
-
-### 💸 Expenses & Shared Ledger
-
-* Add shared expenses per group
-* Automatic expense splitting
-* View total group spending
-* REST API support for expenses
+---
 
 ### ⚖️ Debt Calculation & Settlement
+Automatically calculated debts and global balances, showing who owes whom across groups.
 
-* Automatic debt calculation per group
-* Global balance overview per user
-* View:
+- Debts you need to pay
+- Debts owed to you
+- Manual settlement tracking
 
-    * Debts you need to pay
-    * Debts owed to you
-* Manual settlement tracking
+![Debts Page](screenshots/debts.png)
+
+---
+
+### 💬 Real-Time Chat & Polls
+Real-time group communication for coordination and decision making.
+
+- WebSocket-based group chat (STOMP)
+- Polls for quick group decisions
+- Live vote updates
+
+![Chat with Poll](screenshots/chat.png)
+
+---
+
+### 👤 Authentication, Groups & Security
+Secure access and group management.
+
+- User registration with email verification
+- JWT-based authentication
+- Group creation, admin roles, and invite links
+- Route protection via Spring Security
 
 ---
 
