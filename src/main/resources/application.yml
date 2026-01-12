@@ -6,19 +6,22 @@ spring:
     name: gather
 
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
 
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT}
 
   mail:
-    host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
-    port: ${MAIL_PORT:2525}
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
